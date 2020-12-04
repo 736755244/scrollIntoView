@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style>
+			body{
+				margin: 0;
+				padding: 0;
+			}
+			.content{
+				position: relative;
+				height: 100vh;
+				overflow-y: scroll;
+			}
+			.left{
+				position: absolute;
+				left: 0;
+				width: 200px;
+				background: bisque;
+				height: 100%;
+				text-align: center;
+			}
+			.menuitem{
+				cursor: pointer;
+				display: block;
+			}
+			.right{
+				position: absolute;
+				left: 220px;
+				height: 100%;
+				overflow-y: auto;
+			}
+			.par{
+				width:100%;
+				height: 100%;
+				background: #fff;
+			}
+			.child{
+				width: 700px;
+			}
+			.active{
+				color:royalblue;
+			}
+			.child:nth-child(1){
+				height:350px;
+				background-color: aqua;
+			}
+			.child:nth-child(2){
+				height:150px;
+				background-color: red;
+			}
+			.child:nth-child(3){
+				height:450px;
+				background-color: yellow;
+			}
+			.child:nth-child(4){
+				height:200px;
+				background-color: blue;
+			}
+			.child:nth-child(5){
+				height:180px;
+				background-color: darkgreen;
+			}
+			.child:nth-child(6){
+				height:300px;
+				background-color: deeppink;
+			}
+			.child:nth-child(7){
+				height:400px;
+				background-color: firebrick;
+			}
+			.child:nth-child(8){
+				height:500px;
+				background-color: royalblue;
+			}
+			.child:nth-child(9){
+				height:100px;
+				background-color: deepskyblue;
+			}
+			.child:nth-child(10){
+				height:200px;
+				background-color: darkgreen;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="content">
+			<div class="left"></div>
+			<div class="right">
+				<div class="par">
+					<div class="child" id="m1"><span>我是第1个顶部</span></div>
+					<div class="child" id="m2"><span>我是第2个顶部</span></div>
+					<div class="child" id="m3"><span>我是第3个顶部</span></div>
+					<div class="child" id="m4"><span>我是第4个顶部</span></div>
+					<div class="child" id="m5"><span>我是第5个顶部</span></div>
+					<div class="child" id="m6"><span>我是第6个顶部</span></div>
+					<div class="child" id="m7"><span>我是第7个顶部</span></div>
+					<div class="child" id="m8"><span>我是第8个顶部</span></div>
+					<div class="child" id="m9"><span>我是第9个顶部</span></div>
+					<div class="child" id="m10"><span>我是第10个顶部</span></div>
+				</div>
+			</div>
+		</div>
+		
+		<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+		<script type="text/javascript">
+			// 菜单列表
+			var menuList = [
+				{ name: '菜单1', key: 'm1' }, 
+				{ name: '菜单2', key: 'm2' },
+				{ name: '菜单3', key: 'm3' }, 
+				{ name: '菜单4', key: 'm4' },
+				{ name: '菜单5', key: 'm5' }, 
+				{ name: '菜单6', key: 'm6' },
+				{ name: '菜单7', key: 'm7' },
+				{ name: '菜单8', key: 'm8' },
+				{ name: '菜单9', key: 'm9' },
+				{ name: '菜单10', key: 'm10' }, 
+			];
+			//拼接菜单内容
+			var content = '';
+			for (let i=0;i<menuList.length;i++) {
+				let name = menuList[i].name;
+				let key = menuList[i].key;
+				content += `<a class="menuitem" id="m_`+key+ `" data-key="`+key+`">`+name+`</a></br>`
+			}
+			$('.left').html(content);
+			//默认选中左侧第一个菜单
+			$(".menuitem")[0].classList.add("active");
+			
+			//监听菜单点击事件
+			$('.menuitem').on('click',e=>{
+				//清除右侧滚动监听（不清除的情况下，左侧菜单会从原选中菜单到目标菜单逐个变色，也可不清除）
+				$(".right")[0].removeEventListener("scroll", autoActive);
+				//绑定的key值
+				let key = e.target.dataset.key;
+				//右侧聚焦到视口顶部
+				$('#'+key)[0].scrollIntoView({ block: "start", behavior: "smooth" });
+				//设置选中状态，同时清除其他选中状态
+				$('#m_'+key).siblings().removeClass("active");
+				$('#m_'+key).addClass("active");
+				//滚动事件监听(弃用)
+				// $(".right")[0].addEventListener("scroll", autoActive);
+				//判断是否滚动完毕，再次添加滚动事件
+				let temp = 0;
+				setTimeout(function judge(){
+					let temp1 = $(".right")[0].scrollTop;
+					if (temp != temp1) {  //两次滚动高度不等，则认为还没有滚动完毕
+						setTimeout(judge,100);
+						temp = temp1;  //滚动高度赋值
+					} else{
+						$(".right")[0].addEventListener("scroll", autoActive);
+						temp = null;  //放弃引用
+					}
+				},100);
+			});
+			
+			
+			//右侧滚动监听
+			let cur = 0;
+			//滚动事件监听
+			$(".right")[0].addEventListener("scroll", autoActive);
+			//滚动函数
+			function autoActive(e) {
+				var scrollTopLength = $(".right")[0].scrollTop;
+				
+				var childs = $(".child");
+				var idx = 0;
+				
+				//判断聚焦到哪一个菜单上
+				for (let i = 0; i < childs.length - 1; i++) {
+					if (scrollTopLength < childs[i].offsetTop) {
+						idx = i-1
+						break
+					}
+				}
+				//滚动视图变化，修改classname
+				if(cur!=idx){
+					for(let i=0;i<menuList.length-1;i++){
+						//添加active
+						if(i==idx){
+							if(!$(".menuitem")[i].classList.contains("active")){
+								$(".menuitem")[i].classList.add("active");
+							}
+						}else{//移除active
+							if($(".menuitem")[i].classList.contains("active")){
+								$(".menuitem")[i].classList.remove("active");
+							}
+						}
+					}
+					cur = idx;
+				}
+			};
+		</script>
+	</body>
+</html>
